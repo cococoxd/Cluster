@@ -1,21 +1,21 @@
-# PINRemoteImage
+# build_tools
 
 ## Fast, non-deadlocking parallel image downloader and cache for iOS
 
-[![CocoaPods compatible](https://img.shields.io/cocoapods/v/PINRemoteImage.svg?style=flat)](https://cocoapods.org/pods/PINRemoteImage)
+[![CocoaPods compatible](https://img.shields.io/cocoapods/v/build_tools.svg?style=flat)](https://cocoapods.org/pods/build_tools)
 [![Carthage compatible](https://img.shields.io/badge/Carthage-compatible-4BC51D.svg?style=flat)](https://github.com/Carthage/Carthage)
-[![Build status](https://github.com/pinterest/PINRemoteImage/workflows/CI/badge.svg)](https://github.com/pinterest/PINRemoteImage/actions?query=workflow%3ACI+branch%3Amaster)
+[![Build status](https://github.com/pinterest/build_tools/workflows/CI/badge.svg)](https://github.com/pinterest/build_tools/actions?query=workflow%3ACI+branch%3Amaster)
 
-[PINRemoteImageManager](Source/Classes/PINRemoteImageManager.h) is an image downloading, processing and caching manager. It uses the concept of download and processing tasks to ensure that even if multiple calls to download or process an image are made, it only occurs one time (unless an item is no longer in the cache). PINRemoteImageManager is backed by **GCD** and safe to **access** from **multiple threads** simultaneously. It ensures that images are decoded off the main thread so that animation performance isn't affected. None of its exposed methods allow for synchronous access. However, it is optimized to call completions on the calling thread if an item is in its memory cache.
+[build_toolsManager](Source/Classes/build_toolsManager.h) is an image downloading, processing and caching manager. It uses the concept of download and processing tasks to ensure that even if multiple calls to download or process an image are made, it only occurs one time (unless an item is no longer in the cache). build_toolsManager is backed by **GCD** and safe to **access** from **multiple threads** simultaneously. It ensures that images are decoded off the main thread so that animation performance isn't affected. None of its exposed methods allow for synchronous access. However, it is optimized to call completions on the calling thread if an item is in its memory cache.
 
-PINRemoteImage supports downloading many types of files. It, of course, **supports** both **PNGs** and **JPGs**. It also supports decoding **WebP** images if Google's library is available. It even supports **GIFs** and **Animated WebP** via PINAnimatedImageView.
+build_tools supports downloading many types of files. It, of course, **supports** both **PNGs** and **JPGs**. It also supports decoding **WebP** images if Google's library is available. It even supports **GIFs** and **Animated WebP** via PINAnimatedImageView.
 
-PINRemoteImage also has two methods to improve the experience of downloading images on slow network connections. The first is support for **progressive JPGs**. This isn't any old support for progressive JPGs though: PINRemoteImage adds an attractive blur to progressive scans before returning them.
+build_tools also has two methods to improve the experience of downloading images on slow network connections. The first is support for **progressive JPGs**. This isn't any old support for progressive JPGs though: build_tools adds an attractive blur to progressive scans before returning them.
 
 ![Progressive JPG with Blur](/progressive.gif "Looks better on device.")
 
-[PINRemoteImageCategoryManager](Pod/Classes/PINRemoteImageCategoryManager.h) defines a protocol which UIView subclasses can implement and provide easy access to
-PINRemoteImageManager's methods. There are **built-in categories** on **UIImageView**, **PINAnimatedImageView** and **UIButton**, and it's very easy to implement a new category. See [UIImageView+PINRemoteImage](/Pod/Classes/Image Categories/UIImageView+PINRemoteImage.h) of the existing categories for reference.
+[build_toolsCategoryManager](Pod/Classes/build_toolsCategoryManager.h) defines a protocol which UIView subclasses can implement and provide easy access to
+build_toolsManager's methods. There are **built-in categories** on **UIImageView**, **PINAnimatedImageView** and **UIButton**, and it's very easy to implement a new category. See [UIImageView+build_tools](/Pod/Classes/Image Categories/UIImageView+build_tools.h) of the existing categories for reference.
 
 
 ### Download an image and set it on an image view:
@@ -81,7 +81,7 @@ animatedImageView.pin_setImage(from: URL(string: "http://pinterest.com/flyingKit
 **Objective-C**
 ```objc
 UIImageView *imageView = [[UIImageView alloc] init];
-[self.imageView pin_setImageFromURL:[NSURL URLWithString:@"https://i.pinimg.com/736x/5b/c6/c5/5bc6c5387ff6f104fd642f2b375efba3.jpg"] processorKey:@"rounded" processor:^UIImage *(PINRemoteImageManagerResult *result, NSUInteger *cost)
+[self.imageView pin_setImageFromURL:[NSURL URLWithString:@"https://i.pinimg.com/736x/5b/c6/c5/5bc6c5387ff6f104fd642f2b375efba3.jpg"] processorKey:@"rounded" processor:^UIImage *(build_toolsManagerResult *result, NSUInteger *cost)
  {
      CGSize targetSize = CGSizeMake(200, 300);
      CGRect imageRect = CGRectMake(0, 0, targetSize.width, targetSize.height);
@@ -165,25 +165,25 @@ imageView.pin_setImage(from: URL(string: "https://i.pinimg.com/736x/5b/c6/c5/5bc
 
 **Objective-C**
 ```objc
-[[PINRemoteImageManager sharedImageManager] setAuthenticationChallenge:^(NSURLSessionTask *task, NSURLAuthenticationChallenge *challenge, PINRemoteImageManagerAuthenticationChallengeCompletionHandler aCompletion) {
+[[build_toolsManager sharedImageManager] setAuthenticationChallenge:^(NSURLSessionTask *task, NSURLAuthenticationChallenge *challenge, build_toolsManagerAuthenticationChallengeCompletionHandler aCompletion) {
 aCompletion(NSURLSessionAuthChallengePerformDefaultHandling, nil)];
 ```
 
 **Swift**
 ```swift
-PINRemoteImageManager.shared().setAuthenticationChallenge { (task, challenge, completion) in
+build_toolsManager.shared().setAuthenticationChallenge { (task, challenge, completion) in
   completion?(.performDefaultHandling, nil)
 }
 ```
 
 ### Support for high resolution images
-Currently there are two ways PINRemoteImage is supporting high resolution images:
-1. If the URL contains an `_2x.` or an `_3x.` postfix it will be automatically handled by PINRemoteImage and the resulting image will be returned at the right scale.
+Currently there are two ways build_tools is supporting high resolution images:
+1. If the URL contains an `_2x.` or an `_3x.` postfix it will be automatically handled by build_tools and the resulting image will be returned at the right scale.
 2. If it's not possible to provide an URL with an `_2x.` or `_3x.` postfix, you can also handle it with a completion handler:
 ```objc
 NSURL *url = ...;
 __weak UIImageView *weakImageView = self.imageView;
-[self.imageView pin_setImageFromURL:url completion:^(PINRemoteImageManagerResult * _Nonnull result) {
+[self.imageView pin_setImageFromURL:url completion:^(build_toolsManagerResult * _Nonnull result) {
   CGFloat scale = UIScreen.mainScreen.scale;
   if (scale > 1.0) {
     UIImage *image = result.image;
@@ -195,7 +195,7 @@ __weak UIImageView *weakImageView = self.imageView;
 ### Set some limits
 ```
 // cache is an instance of PINCache as long as you haven't overridden defaultImageCache
-PINCache *cache = (PINCache *)[[PINRemoteImageManager sharedImageManager] cache];
+PINCache *cache = (PINCache *)[[build_toolsManager sharedImageManager] cache];
 // Max memory cost is based on number of pixels, we estimate the size of one hundred 600x600 images as our max memory image cache.
 [[cache memoryCache] setCostLimit:600 * [[UIScreen mainScreen] scale] * 600 * [[UIScreen mainScreen] scale] * 100];
 
@@ -209,33 +209,33 @@ PINCache *cache = (PINCache *)[[PINRemoteImageManager sharedImageManager] cache]
 
 ### CocoaPods
 
-Add [PINRemoteImage](http://cocoapods.org/?q=name%3APINRemoteImage) to your `Podfile` and run `pod install`.
+Add [build_tools](http://cocoapods.org/?q=name%3Abuild_tools) to your `Podfile` and run `pod install`.
 
-If you'd like to use WebP images, add [PINRemoteImage/WebP](http://cocoapods.org/?q=name%3APINRemoteImage) to your `Podfile` and run `pod install`.
+If you'd like to use WebP images, add [build_tools/WebP](http://cocoapods.org/?q=name%3Abuild_tools) to your `Podfile` and run `pod install`.
 
 
 ### Carthage
 
-Add `github "pinterest/PINRemoteImage"` to your Cartfile . See [Carthage's readme](https://github.com/Carthage/Carthage) for more information on integrating Carthage-built frameworks into your project.
+Add `github "pinterest/build_tools"` to your Cartfile . See [Carthage's readme](https://github.com/Carthage/Carthage) for more information on integrating Carthage-built frameworks into your project.
 
 ### Manually
 
-[Download the latest tag](https://github.com/Pinterest/PINRemoteImage/tags) and drag the `Pod/Classes` folder into your Xcode project. You must also manually link against [PINCache](https://github.com/pinterest/PINCache).
+[Download the latest tag](https://github.com/Pinterest/build_tools/tags) and drag the `Pod/Classes` folder into your Xcode project. You must also manually link against [PINCache](https://github.com/pinterest/PINCache).
 
-Install the docs by double clicking the `.docset` file under `docs/`, or view them online at [cocoadocs.org](http://cocoadocs.org/docsets/PINRemoteImage/)
+Install the docs by double clicking the `.docset` file under `docs/`, or view them online at [cocoadocs.org](http://cocoadocs.org/docsets/build_tools/)
 
 ### Git Submodule
 
-You can set up PINRemoteImage as a submodule of your repo instead of cloning and copying all the files into your repo. Add the submodule using the commands below and then follow the manual instructions above.
+You can set up build_tools as a submodule of your repo instead of cloning and copying all the files into your repo. Add the submodule using the commands below and then follow the manual instructions above.
 
-    git submodule add https://github.com/pinterest/PINRemoteImage.git
+    git submodule add https://github.com/pinterest/build_tools.git
     git submodule update --init
 
 
 
 ## Requirements
 
-__PINRemoteImage__ requires iOS 12.0 or greater.
+__build_tools__ requires iOS 12.0 or greater.
 
 ## Contact
 
